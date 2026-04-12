@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use serde::Serialize;
 use tauri::State;
 
@@ -23,6 +25,44 @@ pub fn apply_redactions(
     clean_metadata: bool,
     state: State<'_, AppState>,
 ) -> AppResult<ApplyRedactionsResponse> {
+    // Validate output path — must be absolute and end with .pdf
+    let out = Path::new(&output_path);
+    if !out.is_absolute() {
+        return Err(AppError::Pdf("Output path must be absolute".to_string()));
+    }
+    match out.extension().and_then(|e| e.to_str()) {
+        Some(ext) if ext.eq_ignore_ascii_case("pdf") => {}
+        _ => return Err(AppError::Pdf("Output path must be a .pdf file".to_string())),
+    }
+    // Prevent writing to system directories
+    let out_str = output_path.as_str();
+    let blocked_prefixes: &[&str] = if cfg!(target_os = "windows") {
+        &["C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)"]
+    } else {
+        &["/System", "/usr", "/bin", "/sbin", "/etc", "/var", "/private/var"]
+    };
+    for prefix in blocked_prefixes {
+        if out_str.starts_with(prefix) {
+            return Err(AppError::Pdf("Cannot write to system directories".to_string()));
+        }
+    }
+
+    // Validate redaction regions
+    for (i, region) in regions.iter().enumerate() {
+        if region.width <= 0.0 || region.height <= 0.0 {
+            return Err(AppError::Pdf(format!(
+                "Redaction region {} has invalid dimensions ({}x{})",
+                i, region.width, region.height
+            )));
+        }
+        if region.x < 0.0 || region.y < 0.0 {
+            return Err(AppError::Pdf(format!(
+                "Redaction region {} has negative coordinates ({}, {})",
+                i, region.x, region.y
+            )));
+        }
+    }
+
     let docs = state.documents.lock().unwrap();
     let meta = docs
         .get(&doc_id)

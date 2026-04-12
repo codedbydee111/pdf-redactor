@@ -26,10 +26,7 @@ pub fn open_pdf(path: String, state: State<'_, AppState>) -> AppResult<OpenPdfRe
     let mut docs = state.documents.lock().unwrap();
     docs.insert(
         doc_id,
-        DocumentMeta {
-            path,
-            page_count,
-        },
+        DocumentMeta { path },
     );
 
     Ok(response)

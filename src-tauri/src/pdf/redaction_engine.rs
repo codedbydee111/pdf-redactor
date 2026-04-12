@@ -26,6 +26,8 @@ pub struct RedactionResult {
 
 /// Apply redactions to a document and save to the output path.
 /// This performs TRUE content removal — not visual overlay.
+/// Saves with garbage collection and clean to strip unreferenced
+/// objects including metadata.
 pub fn apply_redactions(
     doc: &PdfDocument,
     regions: &[RedactionRegion],
@@ -79,8 +81,12 @@ pub fn apply_redactions(
         pages_affected += 1;
     }
 
-    // Save the redacted document
-    doc.save(output_path)
+    // Save with garbage collection (level 4 = max) and clean enabled
+    // to strip unreferenced objects and metadata
+    let mut options = mupdf::pdf::PdfWriteOptions::default();
+    options.set_garbage_level(4);
+    options.set_clean(true);
+    doc.save_with_options(output_path, options)
         .map_err(|e| AppError::Pdf(format!("Failed to save redacted PDF: {e}")))?;
 
     Ok(RedactionResult {
