@@ -143,24 +143,28 @@ function EmptyState({ onOpen, loading }: { onOpen: () => void; loading: boolean 
       }}>
         <div style={{ flex: 1 }} />
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 68 }}>
-          <h1
-            key={typedText.length}
-            style={{
-              fontSize: 52, fontWeight: 200, letterSpacing: "-0.03em", whiteSpace: "nowrap",
-              color: "rgba(255,255,255,0.88)",
-              fontFamily: "'Georgia', 'Times New Roman', serif",
-              willChange: "contents",
-            }}
-          >
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center", minHeight: 68,
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+        }}>
+          <div style={{
+            fontSize: 52, fontWeight: 200, letterSpacing: "-0.03em", whiteSpace: "nowrap",
+            color: "rgba(255,255,255,0.88)",
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            WebkitFontSmoothing: "subpixel-antialiased",
+            paintOrder: "stroke fill",
+          }}>
             {typedText}
-          </h1>
-          <span style={{
-            display: "inline-block", width: 2, height: 48, flexShrink: 0,
-            background: "rgba(255,255,255,0.5)",
-            animation: "blink 1s ease-in-out infinite",
-            marginLeft: typedText.length > 0 ? 4 : 0,
-          }} />
+            {typedText.length > 0 && (
+              <span style={{
+                display: "inline-block", width: 2, height: 48, verticalAlign: "middle",
+                background: "rgba(255,255,255,0.5)",
+                animation: "blink 1s ease-in-out infinite",
+                marginLeft: 4,
+              }} />
+            )}
+          </div>
         </div>
 
         <div style={{ height: 64 }} />
