@@ -16,7 +16,7 @@ Unlike most PDF tools that simply draw black boxes over text (which can be copy-
 
 ## Download
 
-Go to [Releases](https://github.com/edwarddoan/pdf-redactor/releases) and download the installer for your platform:
+Go to [Releases](https://github.com/codedbydee111/pdf-redactor/releases) and download the installer for your platform:
 
 | Platform | File |
 |----------|------|
