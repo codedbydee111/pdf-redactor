@@ -10,7 +10,7 @@ export function usePdfDocument() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { setDocument, closeDocument } = useAppStore();
+  const { setDocument } = useAppStore();
   const commands = useTauriCommands();
 
   const openFile = useCallback(async () => {
@@ -44,14 +44,5 @@ export function usePdfDocument() {
     }
   }, [commands, setDocument]);
 
-  const closeFile = useCallback(async () => {
-    const docId = useAppStore.getState().docId;
-    if (docId) {
-      await commands.closePdf(docId);
-    }
-    setPdfDoc(null);
-    closeDocument();
-  }, [commands, closeDocument]);
-
-  return { pdfDoc, loading, error, openFile, closeFile };
+  return { pdfDoc, loading, error, openFile };
 }
