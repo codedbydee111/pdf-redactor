@@ -13,12 +13,11 @@ interface ToolbarProps {
 
 export function Toolbar({ onOpen, onExport, loading, dark }: ToolbarProps) {
   const {
-    docId, activeTool, setActiveTool, zoom, setZoom,
+    activeTool, setActiveTool, zoom, setZoom,
     redactions, undo, redo, undoStack, redoStack,
     currentPage, pageCount, filePath,
   } = useAppStore();
 
-  const hasDoc = !!docId;
   const fileName = filePath?.split("/").pop()?.replace(/\.pdf$/i, "") ?? "";
 
   if (dark) {
