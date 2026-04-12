@@ -1,8 +1,14 @@
 # PDF Redactor
 
-A free, open-source desktop app for permanently redacting sensitive content from PDFs. No cloud uploads. No subscriptions. Everything runs locally on your machine.
+I had a deadline. I needed to redact a PDF. Simple, right?
 
-Unlike most PDF tools that simply draw black boxes over text (which can be copy-pasted or extracted), PDF Redactor uses **true content removal** — the underlying text, images, and metadata are permanently deleted from the file.
+So I Googled "redact PDF" and got hit with the usual circus — upload your file to some random website, sign up for a free trial that's not actually free, get reminded 47 times that "Pro" unlocks the feature you actually need, and oh by the way here's an ad. All I wanted to do was black out some text and save the file. That's it. That's the whole task.
+
+Every tool was either a subscription trying to empty my wallet, a sketchy online editor uploading my sensitive documents to god-knows-where, or something that just drew a black rectangle on top of the text (which anyone can copy-paste right through). I got sick of it.
+
+So I built this instead.
+
+**PDF Redactor** is a free, open-source desktop app that does one thing properly: permanently redact sensitive content from PDFs. No cloud uploads. No subscriptions. No ads. No "upgrade to Pro." Everything runs locally on your machine, and when it says the content is redacted, it means the content is **gone** — not hidden under a black box, but actually deleted from the file.
 
 ## Features
 
