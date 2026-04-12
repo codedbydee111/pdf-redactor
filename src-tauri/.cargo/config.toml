@@ -1,0 +1,2 @@
+[build]
+target-dir = "/tmp/pdf-redactor-target"
