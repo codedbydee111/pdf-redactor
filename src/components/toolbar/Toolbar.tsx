@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  MousePointer2, SquareDashedMousePointer, Undo2, Redo2, Download, FolderOpen, Minus, Plus,
+  MousePointer2, SquareDashedMousePointer, Undo2, Redo2, Download, FolderOpen, Minus, Plus, Sun, Moon,
 } from "lucide-react";
 import { useAppStore } from "../../lib/store";
 
@@ -15,7 +15,7 @@ export function Toolbar({ onOpen, onExport, loading, dark }: ToolbarProps) {
   const {
     activeTool, setActiveTool, zoom, setZoom,
     redactions, undo, redo, undoStack, redoStack,
-    currentPage, pageCount, filePath,
+    currentPage, pageCount, filePath, theme, toggleTheme,
   } = useAppStore();
 
   const fileName = filePath?.split("/").pop()?.replace(/\.pdf$/i, "") ?? "";
@@ -61,7 +61,7 @@ export function Toolbar({ onOpen, onExport, loading, dark }: ToolbarProps) {
       display: "flex", alignItems: "center",
       height: 48, flexShrink: 0, userSelect: "none",
       padding: "0 20px",
-      background: "#fff", borderBottom: "1px solid var(--gray-200)",
+      background: "var(--bg-surface)", borderBottom: "1px solid var(--gray-200)",
     }}>
       {/* ── Left: File + Tools ── */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
@@ -145,6 +145,15 @@ export function Toolbar({ onOpen, onExport, loading, dark }: ToolbarProps) {
 
         <Sep />
 
+        <button onClick={toggleTheme} className="icon-btn" title={theme === "light" ? "Dark mode" : "Light mode"}>
+          {theme === "light"
+            ? <Moon size={14} strokeWidth={1.7} />
+            : <Sun size={14} strokeWidth={1.7} />
+          }
+        </button>
+
+        <Sep />
+
         <button
           onClick={onExport}
           disabled={!hasRedactions}
@@ -201,7 +210,7 @@ function ToolButton({
         <div style={{
           position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
           marginTop: 8, padding: "5px 10px", borderRadius: 6, whiteSpace: "nowrap",
-          background: "var(--gray-950)", color: "#fff",
+          background: "var(--tooltip-bg)", color: "var(--tooltip-fg)",
           fontSize: 11, fontWeight: 500, lineHeight: 1,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           zIndex: 50, pointerEvents: "none",

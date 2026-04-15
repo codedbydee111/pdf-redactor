@@ -33,6 +33,21 @@ export interface RedactionRegion {
   source: "manual" | "search" | "selection";
 }
 
+export interface MatchRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface SearchMatch {
+  page: number;
+  match_text: string;
+  context_before: string;
+  context_after: string;
+  rects: MatchRect[];
+}
+
 export interface ApplyRedactionsResponse {
   pages_affected: number;
   regions_applied: number;

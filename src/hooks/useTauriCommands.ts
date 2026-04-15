@@ -3,6 +3,7 @@ import type {
   OpenPdfResponse,
   PageDimensions,
   PageText,
+  SearchMatch,
   RedactionRegion,
   ApplyRedactionsResponse,
   VerificationResult,
@@ -21,6 +22,9 @@ export function useTauriCommands() {
 
     extractText: (docId: string, pageNum: number) =>
       invoke<PageText>("extract_text", { docId, pageNum }),
+
+    searchText: (docId: string, query: string) =>
+      invoke<SearchMatch[]>("search_text", { docId, query }),
 
     applyRedactions: (
       docId: string,

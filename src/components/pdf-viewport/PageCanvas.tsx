@@ -11,9 +11,13 @@ interface PageCanvasProps {
 export function PageCanvas({ pdfDoc, pageNum, scale }: PageCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [pdfDims, setPdfDims] = useState({ width: 0, height: 0 });
-  const [cssDims, setCssDims] = useState({ width: 0, height: 0 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const taskRef = useRef<any>(null);
+
+  // CSS dimensions update synchronously from state — zoom feels instant.
+  // The canvas bitmap is stretched/squeezed until the re-render lands.
+  const cssWidth = pdfDims.width * scale;
+  const cssHeight = pdfDims.height * scale;
 
   useEffect(() => {
     let cancelled = false;
@@ -27,21 +31,32 @@ export function PageCanvas({ pdfDoc, pageNum, scale }: PageCanvasProps) {
       setPdfDims({ width: base.width, height: base.height });
 
       const viewport = page.getViewport({ scale: scale * dpr });
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
       const bw = Math.round(viewport.width);
       const bh = Math.round(viewport.height);
-      canvas.width = bw;
-      canvas.height = bh;
-      setCssDims({ width: bw / dpr, height: bh / dpr });
+
+      // Render to an offscreen canvas so the visible one isn't blanked.
+      const offscreen = document.createElement("canvas");
+      offscreen.width = bw;
+      offscreen.height = bh;
 
       if (taskRef.current) { taskRef.current.cancel(); taskRef.current = null; }
 
-      const task = page.render({ canvas, viewport });
+      const task = page.render({ canvas: offscreen, viewport });
       taskRef.current = task;
 
-      try { await task.promise; } catch { /* cancelled */ }
+      try {
+        await task.promise;
+        if (cancelled) return;
+        // Swap the finished bitmap onto the visible canvas in one
+        // synchronous
+        const canvas = canvasRef.current;
+        if (canvas) {
+          canvas.width = bw;
+          canvas.height = bh;
+          const ctx = canvas.getContext("2d");
+          if (ctx) ctx.drawImage(offscreen, 0, 0);
+        }
+      } catch { /* cancelled */ }
     }
 
     render();
@@ -52,7 +67,7 @@ export function PageCanvas({ pdfDoc, pageNum, scale }: PageCanvasProps) {
     <div style={{ position: "relative", display: "inline-block" }}>
       <canvas
         ref={canvasRef}
-        style={{ display: "block", width: cssDims.width, height: cssDims.height }}
+        style={{ display: "block", width: cssWidth, height: cssHeight }}
       />
       <AnnotationLayer
         pageNum={pageNum}

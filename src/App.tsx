@@ -12,7 +12,12 @@ import { useAppStore } from "./lib/store";
 function App() {
   const { pdfDoc, loading, error, openFile } = usePdfDocument();
   const commands = useTauriCommands();
-  const { docId, redactions, undo, redo } = useAppStore();
+  const { docId, redactions, undo, redo, theme } = useAppStore();
+
+  // Sync theme attribute to <html> so CSS variables cascade to html/body/scrollbars.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const handleExport = useCallback(async () => {
     if (!docId || redactions.length === 0) return;
@@ -49,7 +54,7 @@ function App() {
   return (
     <div style={{
       height: "100%", display: "flex", flexDirection: "column",
-      background: isLanding ? "#0a0a14" : "var(--gray-50)",
+      background: isLanding ? "#0a0a14" : "var(--bg-app)",
     }}>
       <Toolbar onOpen={openFile} onExport={handleExport} loading={loading} dark={isLanding} />
 

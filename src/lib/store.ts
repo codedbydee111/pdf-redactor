@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import type { RedactionRegion, Tool } from "./types";
+import type { RedactionRegion, SearchMatch, Tool } from "./types";
+
+export type Theme = "light" | "dark";
 
 interface AppStore {
   // Document state
@@ -12,6 +14,9 @@ interface AppStore {
   // Tool state
   activeTool: Tool;
 
+  // Theme
+  theme: Theme;
+
   // Redaction state
   redactions: RedactionRegion[];
   undoStack: RedactionRegion[][];
@@ -19,26 +24,40 @@ interface AppStore {
 
   // Search state
   searchQuery: string;
-  searchResults: { page: number; text: string; x: number; y: number; width: number; height: number }[];
+  searchResults: SearchMatch[];
+
+  // Navigation — viewport listens to this and scrolls when it changes
+  scrollRequest: { page: number; id: number } | null;
 
   // Actions
   setDocument: (docId: string, filePath: string, pageCount: number) => void;
   closeDocument: () => void;
   setCurrentPage: (page: number) => void;
+  scrollToPage: (page: number) => void;
   setZoom: (zoom: number) => void;
   setActiveTool: (tool: Tool) => void;
 
-  addRedaction: (region: Omit<RedactionRegion, "id">) => void;
+  addRedaction: (region: Omit<RedactionRegion, "id">) => string;
   removeRedaction: (id: string) => void;
   clearRedactions: () => void;
   undo: () => void;
   redo: () => void;
 
   setSearchQuery: (query: string) => void;
-  setSearchResults: (results: AppStore["searchResults"]) => void;
+  setSearchResults: (results: SearchMatch[]) => void;
+
+  toggleTheme: () => void;
 }
 
 let nextRedactionId = 1;
+
+function getInitialTheme(): Theme {
+  try {
+    const stored = localStorage.getItem("pdf-redactor-theme");
+    if (stored === "dark" || stored === "light") return stored;
+  } catch { /* localStorage unavailable */ }
+  return "light";
+}
 
 export const useAppStore = create<AppStore>((set, get) => ({
   docId: null,
@@ -47,11 +66,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
   currentPage: 0,
   zoom: 1.0,
   activeTool: "select",
+  theme: getInitialTheme(),
   redactions: [],
   undoStack: [],
   redoStack: [],
   searchQuery: "",
   searchResults: [],
+  scrollRequest: null,
 
   setDocument: (docId, filePath, pageCount) =>
     set({
@@ -78,6 +99,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }),
 
   setCurrentPage: (page) => set({ currentPage: page }),
+  scrollToPage: (page) => set({ scrollRequest: { page, id: Date.now() } }),
   setZoom: (zoom) => set({ zoom: Math.max(0.25, Math.min(4.0, zoom)) }),
   setActiveTool: (tool) => set({ activeTool: tool }),
 
@@ -89,6 +111,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       undoStack: [...undoStack, redactions],
       redoStack: [],
     });
+    return id;
   },
 
   removeRedaction: (id) => {
@@ -135,4 +158,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSearchResults: (results) => set({ searchResults: results }),
+
+  toggleTheme: () => {
+    const next = get().theme === "light" ? "dark" : "light";
+    try { localStorage.setItem("pdf-redactor-theme", next); } catch { /* noop */ }
+    set({ theme: next });
+  },
 }));

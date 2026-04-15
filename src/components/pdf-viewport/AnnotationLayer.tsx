@@ -100,7 +100,7 @@ export function AnnotationLayer({ pageNum, scale, pdfWidth, pdfHeight }: Annotat
               width: 20, height: 20, opacity: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
               borderRadius: "var(--radius-sm)",
-              background: "var(--gray-950)", color: "#fff",
+              background: "var(--tooltip-bg)", color: "var(--tooltip-fg)",
               boxShadow: "var(--shadow-lg)",
               transition: "opacity 150ms ease",
             }}

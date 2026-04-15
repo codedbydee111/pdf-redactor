@@ -1,7 +1,9 @@
+use std::path::Path;
+
 use serde::Serialize;
 use tauri::State;
 
-use crate::error::AppResult;
+use crate::error::{AppError, AppResult};
 use crate::pdf::document;
 use crate::state::{AppState, DocumentMeta};
 
@@ -14,6 +16,12 @@ pub struct OpenPdfResponse {
 
 #[tauri::command]
 pub fn open_pdf(path: String, state: State<'_, AppState>) -> AppResult<OpenPdfResponse> {
+    // Validate the file has a .pdf extension before handing to MuPDF
+    match Path::new(&path).extension().and_then(|e| e.to_str()) {
+        Some(ext) if ext.eq_ignore_ascii_case("pdf") => {}
+        _ => return Err(AppError::Pdf("File must have a .pdf extension".to_string())),
+    }
+
     let page_count = document::page_count(&path)?;
     let doc_id = state.next_document_id();
 

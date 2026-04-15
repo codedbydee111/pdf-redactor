@@ -8,10 +8,12 @@ interface PdfViewportProps {
 }
 
 export function PdfViewport({ pdfDoc }: PdfViewportProps) {
-  const { zoom, pageCount, setCurrentPage, activeTool } = useAppStore();
+  const { zoom, pageCount, setCurrentPage, scrollRequest, activeTool } = useAppStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const isRedactMode = activeTool === "redact";
+  const lastScrollReqId = useRef<number>(0);
 
+  // Track current page from scroll position.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -29,6 +31,18 @@ export function PdfViewport({ pdfDoc }: PdfViewportProps) {
     return () => el.removeEventListener("scroll", onScroll);
   }, [setCurrentPage]);
 
+  // Scroll to page when sidebar requests it.
+  useEffect(() => {
+    if (!scrollRequest || scrollRequest.id === lastScrollReqId.current) return;
+    lastScrollReqId.current = scrollRequest.id;
+    const el = containerRef.current;
+    if (!el) return;
+    const child = el.children[scrollRequest.page] as HTMLElement | undefined;
+    if (child) {
+      child.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [scrollRequest]);
+
   return (
     <div
       ref={containerRef}
@@ -37,7 +51,7 @@ export function PdfViewport({ pdfDoc }: PdfViewportProps) {
         flex: 1, minHeight: 0, overflowY: "auto",
         display: "flex", flexDirection: "column", alignItems: "center",
         padding: "40px 56px",
-        background: isRedactMode ? "#f5f0f0" : "var(--gray-100)",
+        background: isRedactMode ? "var(--bg-viewport-redact)" : "var(--bg-viewport)",
       }}
     >
       {Array.from({ length: pageCount }, (_, i) => (
@@ -47,8 +61,8 @@ export function PdfViewport({ pdfDoc }: PdfViewportProps) {
             marginBottom: 24, flexShrink: 0,
             borderRadius: "var(--radius-sm)",
             boxShadow: isRedactMode
-              ? "0 1px 6px rgba(15,17,23,0.06), 0 0 0 1px rgba(220,38,38,0.08)"
-              : "0 1px 6px rgba(15,17,23,0.06), 0 0 0 1px rgba(15,17,23,0.03)",
+              ? "var(--page-shadow-redact)"
+              : "var(--page-shadow)",
             transition: "box-shadow 300ms ease",
           }}
         >

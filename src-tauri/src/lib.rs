@@ -16,6 +16,7 @@ pub fn run() {
             commands::file::close_pdf,
             commands::document::get_page_dimensions,
             commands::text::extract_text,
+            commands::text::search_text,
             commands::redaction::apply_redactions,
             commands::redaction::verify_redaction,
         ])
